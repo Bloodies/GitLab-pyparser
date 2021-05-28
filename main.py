@@ -1,3 +1,5 @@
+#pip install -r requirements.txt
+
 from selenium import webdriver
 from lxml import html
 from selenium.webdriver.chrome.options import Options
