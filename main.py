@@ -13,6 +13,7 @@ encoding = 'cp1252'     # utf-8 #Настройка декодера
 js_dir_sleep_time = 3   # Время для работы js на странице для чтения папок
 js_file_sleep_time = 1  # Время для работы js на странице для чтения вложенных файлов
 
+WINUSER = 'Bloodies'    # Имя пользователя Windows
 # GIT_LOGIN = "example"
 # GIT_PASSWORD = "example"
 GIT_URL = 'https://gitlab.com/Bloodies/Testing'  # URL для парсинга
@@ -65,7 +66,7 @@ class Parser(object):
 
             path = GIT_URL.rsplit('/', 1)[1:]
             print("folder " + path[0] + '\033[31m' + " Checked" + '\x1b[0m')
-            iter_item = iter(tmpdir_list)
+            iter_item = iter(tmpdir_list)    # Создание итератора из списка
             GIT_URL = next(iter_item, None)
             del tmpdir_list[0]
             if not tmpdir_list:
@@ -83,6 +84,7 @@ class Parser(object):
         iter_subitem = iter(tmpfile_list)
         GIT_URL = next(iter_subitem, None)
 
+        ''' Чтение дирикторий и отправка в redis'''
         while reader:
             self.driver.get(GIT_URL)
             time.sleep(js_file_sleep_time)
@@ -98,35 +100,23 @@ class Parser(object):
             path = GIT_URL.replace("https://gitlab.com/" + temp[3] + "/" + temp[4], "").replace("/-/blob/", "")
 
             # region 1 variant
-            # DATA = {
-            #     "Date": time_element.get_attribute('datetime'),
-            #     "Name": file_name[0],
-            #     "Short Hash": HASH[0][:8],
-            #     "Full Hash": HASH[0],
-            #     "Path": GIT_URL,
-            #     "Download URL": GIT_URL.replace("blob", "raw") + "?inline=false"
-            # }
-            # REDIS.hmset(path, DATA)
-            # endregion
-
-            # region 2 variant
-            # REDIS.hset(path, 'Date', time_element.get_attribute('datetime'))
-            # REDIS.hset(path, 'Name', file_name[0])
-            # REDIS.hset(path, 'Short Hash', HASH[0][:8])
-            # REDIS.hset(path, 'Full Hash', HASH[0])
-            # REDIS.hset(path, 'Path', GIT_URL)
-            # REDIS.hset(path, 'Download URL', GIT_URL.replace("blob", "raw") + "?inline=false")
+            REDIS.hset(path, 'Date', time_element.get_attribute('datetime'))
+            REDIS.hset(path, 'Name', file_name[0])
+            REDIS.hset(path, 'Short Hash', HASH[0][:8])
+            REDIS.hset(path, 'Full Hash', HASH[0])
+            REDIS.hset(path, 'Path', GIT_URL)
+            REDIS.hset(path, 'Download URL', GIT_URL.replace("blob", "raw") + "?inline=false")
             # endregion
 
             # region 3 variant
-            REDIS.zadd(path, {
-                time_element.get_attribute('datetime'): 1,
-                file_name[0]: 2,
-                HASH[0][:8]: 3,
-                HASH[0]: 4,
-                GIT_URL: 5,
-                GIT_URL.replace("blob", "raw") + "?inline=false": 6
-            })
+            # REDIS.zadd(path, {
+            #     time_element.get_attribute('datetime'): 1,
+            #     file_name[0]: 2,
+            #     HASH[0][:8]: 3,
+            #     HASH[0]: 4,
+            #     GIT_URL: 5,
+            #     GIT_URL.replace("blob", "raw") + "?inline=false": 6
+            # })
             # endregion
 
             file_writer.writerow([time_element.get_attribute('datetime'),
@@ -137,7 +127,7 @@ class Parser(object):
                                   GIT_URL.replace("blob", "raw") + "?inline=false"])
 
             # region Output to console
-            # print(timeElement.get_attribute('datetime') + SEP
+            # print(time_element.get_attribute('datetime') + SEP
             #       + file_name[0] + SEP
             #       + GIT_URL + SEP
             #       + HASH[0][:8] + SEP
@@ -177,7 +167,7 @@ def start():
 
     chrome_options = Options()
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument(r"user-data-dir=C:\\Users\\Bloodies\\AppData\\Local\\Google\\Chrome\\User Data")
+    chrome_options.add_argument(r"user-data-dir=C:\\Users\\" + WINUSER + "\\AppData\\Local\\Google\\Chrome\\User Data")
     chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(options=chrome_options)
 
