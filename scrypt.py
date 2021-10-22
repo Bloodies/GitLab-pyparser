@@ -1,13 +1,10 @@
-#pip install -r requirements.txt
+# pip install -r requirements.txt
 
-from selenium import webdriver
-from lxml import html
-from selenium.webdriver.chrome.options import Options
-import undetected_chromedriver.v2 as uc
-import time
 import csv
+import time
 import redis
-import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 encoding = 'cp1252'     # utf-8 #Настройка декодера
 js_dir_sleep_time = 3   # Время для работы js на странице для чтения папок
@@ -49,10 +46,10 @@ class Parser(object):
         global GIT_URL
 
         process = True
-        tmpdir_list = []   # Список содержащий информацию о дирикториях репозитория
+        tmpdir_list = []   # Список содержащий информацию о директориях репозитория
         tmpfile_list = []  # Список содержащий информацию о файлах репозитория
 
-        ''' Чтение репозиторя и заполнение временного листа'''
+        ''' Чтение репозитория и заполнение временного листа'''
         while process:
             self.driver.get(GIT_URL)
             time.sleep(js_dir_sleep_time)
@@ -84,7 +81,7 @@ class Parser(object):
         iter_subitem = iter(tmpfile_list)
         GIT_URL = next(iter_subitem, None)
 
-        ''' Чтение дирикторий и отправка в redis'''
+        ''' Чтение директорий и отправка в redis'''
         while reader:
             self.driver.get(GIT_URL)
             time.sleep(js_file_sleep_time)

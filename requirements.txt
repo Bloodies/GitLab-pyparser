@@ -1,2 +1,2 @@
-selenium
-redis
+redis~=3.5.3
+selenium~=3.141.0
